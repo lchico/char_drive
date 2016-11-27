@@ -29,7 +29,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#define BUF_SIZE 6
+#define BUF_SIZE 200
 
 int main (int argc, char ** argv){
   int fd;
@@ -37,24 +37,27 @@ int main (int argc, char ** argv){
   char data[BUF_SIZE];
 
   if(argc < 2){
-    perror("usage: ./readers /dev/[device_name]");
+    perror("usage: ./readers /dev/[device_name]\n");
     return -1;
   }
 
   fd = open(argv[1],O_RDONLY);
 
   if( fd == -1){
-    perror("Error openning device");
+    perror("Error openning device\n");
     return -1;
   }
   nbytes=0;
   while( nbytes< BUF_SIZE){
-    nbytes+= read(fd,data,BUF_SIZE);
-    if (nbytes > 0)
-	printf("Leido:%s",data);
-  }
+    index=read(fd,data,BUF_SIZE);
+    if (index > 0){
+	printf("Leido:%s, equivalen a %i\n",data,index);
+	printf("Nbytes: %i\n",nbytes);
+	nbytes+=index;
+	index=0;
+    }
+  } 
 
-	data[5]='\0';
 	
   puts(data);
   return 0;

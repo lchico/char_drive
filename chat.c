@@ -172,25 +172,26 @@ ssize_t dev_write(struct file *filp, const char __user *buf, size_t count, loff_
 
 // Read function //
 ssize_t dev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
-    long unsigned int retval=0;
-    /////Some info printed in /var/log/messages ///////
-    printk(KERN_INFO "Entering dev_read function\n");
-    printk(KERN_INFO "Count Parameter from user space %lu.\n", count);
-    printk(KERN_INFO "Offset in buffer %lu.\n",(long unsigned int)*f_pos);
+   long unsigned int retval=0;
+   /////Some info printed in /var/log/messages ///////
+   printk(KERN_INFO "Entering dev_read function\n");
+   printk(KERN_INFO "Count Parameter from user space %lu.\n", count);
+   printk(KERN_INFO "Offset in buffer %lu.\n",(long unsigned int)*f_pos);
 
-    printk("Buffer=%s\n",ptr_buffer_aux);
-    if( *f_pos+count < BUFFER_SIZE ){
-	    spin_lock(&lock_buffer_aux);
-	    retval = copy_to_user((void *)buf,(const void *)ptr_buffer_aux,(unsigned long)f_pos);
-	    spin_unlock(&lock_buffer_aux);
-    }else{
-	printk("Reading over the BUFFER_SIZE");
-    }
-    if (retval == 0){
+   printk("Buffer=%s\n",ptr_buffer_aux);
+   spin_lock(&lock_buffer_aux);
+   retval = copy_to_user((void *)buf,(const void *)ptr_buffer_aux,(unsigned long)f_pos);
+   spin_unlock(&lock_buffer_aux);
+
+   if (retval == 0){
 	*f_pos=count;
    }else{
 	*f_pos=retval;
    }
+   if(retval >= BUFFER_SIZE-1){
+	retval=0;
+   }
+
    return retval;  // returned a single character. Ok
 }
 
