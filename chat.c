@@ -67,6 +67,7 @@
 
 static char  *ptr_buffer=NULL;
 static char  *ptr_buffer_aux=NULL;
+static char  *ptr_buffer_r=NULL;
 static atomic_t nro_user=ATOMIC_INIT(0);
 
 
@@ -85,16 +86,21 @@ void cp_buffers( unsigned long data )
   int ret;
   
 
+  //printk("Buffer=%s\n",ptr_buffer);
   spin_lock(&lock_buffer);
   memcpy(ptr_buffer_aux, ptr_buffer,BUFFER_SIZE);
   spin_unlock(&lock_buffer);
 
-  spin_lock(&lock_buffer_aux);
-  memcpy(ptr_buffer_aux, ptr_buffer,BUFFER_SIZE);
-  spin_unlock(&lock_buffer_aux);
 
+  spin_lock(&lock_buffer_aux);
+  memcpy(ptr_buffer_r, ptr_buffer_aux,BUFFER_SIZE);
+  spin_unlock(&lock_buffer_aux);
+ 
+  //printk("Buffer=%s\n",ptr_buffer_aux);
+ 
   ret = mod_timer( &timer_cpy_buffers, jiffies + msecs_to_jiffies(800) );
   if (ret) printk("Error in mod_timer\n");
+//  printk("Timer update\n");
 
 }
 
@@ -127,15 +133,10 @@ void cleanup_module_timmer( void )
   return;
 }
 
-
-
-
-
 // Write function //
 ssize_t dev_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos) {
     ssize_t retval=-ENOMEM;
     unsigned long i=0;
-    long unsigned int fpos=0;
     /////Some info printed in /var/log/messages ///////
     printk(KERN_INFO "Entering dev_write function\n");
     printk(KERN_INFO "Count Parameter from user space %lu.\n", count);
@@ -146,28 +147,51 @@ ssize_t dev_write(struct file *filp, const char __user *buf, size_t count, loff_
     }else{
         printk("Memory ok.\n");
     }
-    
-    spin_lock(&lock_buffer);
-    if(copy_from_user((char *)ptr_buffer,buf,(long unsigned int)fpos))
-	        return -EFAULT;
-	spin_unlock(&lock_buffer);
 
-    printk("Valores copiados %lu, %s\n",i,ptr_buffer);
+    if( *f_pos+count > BUFFER_SIZE ){
+	printk("Buffer kernel complete.");
+	return -EFAULT;
+    }
+    spin_lock(&lock_buffer);
+    //if(copy_from_user(ptr_buffer,buf,fpos)){
+    retval=strncpy_from_user(ptr_buffer,buf,count);
+    spin_unlock(&lock_buffer);
+    if( retval < 0 ){
+        printk("Error copy from user, %s, %i\n",__FUNCTION__,__LINE__);
+	retval=-EFAULT;
+    }else{
+        retval=count;
+	*f_pos=count;
+    }
+
+   // printk("Recibido de buffer user: %s\n",ptr_buf);    
+    printk("Valores offset  %lu, %s\n",i,ptr_buffer);
+	
     return retval;  // returned a single character. Ok
 }
 
 // Read function //
 ssize_t dev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
+    long unsigned int retval=0;
     /////Some info printed in /var/log/messages ///////
     printk(KERN_INFO "Entering dev_read function\n");
     printk(KERN_INFO "Count Parameter from user space %lu.\n", count);
     printk(KERN_INFO "Offset in buffer %lu.\n",(long unsigned int)*f_pos);
 
-    printk("Buffer=%s",ptr_buffer_aux);
-    spin_lock(&lock_buffer_aux);
-    copy_to_user((void *)buf,(const void *)ptr_buffer_aux,(unsigned long)f_pos);
-    spin_unlock(&lock_buffer_aux);
-    return 1;  // returned a single character. Ok
+    printk("Buffer=%s\n",ptr_buffer_aux);
+    if( *f_pos+count < BUFFER_SIZE ){
+	    spin_lock(&lock_buffer_aux);
+	    retval = copy_to_user((void *)buf,(const void *)ptr_buffer_aux,(unsigned long)f_pos);
+	    spin_unlock(&lock_buffer_aux);
+    }else{
+	printk("Reading over the BUFFER_SIZE");
+    }
+    if (retval == 0){
+	*f_pos=count;
+   }else{
+	*f_pos=retval;
+   }
+   return retval;  // returned a single character. Ok
 }
 
 int open(struct inode * no,struct file *fd){
@@ -179,10 +203,14 @@ int open(struct inode * no,struct file *fd){
     if(atomic_read(&nro_user) == 0){
         ptr_buffer = kmalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
         ptr_buffer_aux = kmalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
-        if ( !ptr_buffer && !ptr_buffer_aux ){
+        ptr_buffer_r = kmalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
+        if ( !ptr_buffer && !ptr_buffer_aux &&  !ptr_buffer_r ){
             printk("Error call mallok, %s, %i\n",__FUNCTION__,__LINE__);
         }else{
             printk("Ingreso el escritor del grupo.Mem OK\n");
+	    memset(ptr_buffer,0,BUFFER_SIZE);
+	    memset(ptr_buffer_aux,0,BUFFER_SIZE);
+	    memset(ptr_buffer_r,0,BUFFER_SIZE);
             // Init timer to copy buffer from kernel buffer to the kernel buffer 
             init_module_timer( );
         }    	
@@ -260,11 +288,11 @@ static void __exit dev_exit(void)
 {
     printk(KERN_INFO "Unloading Module CHAR_01\n");
     cdev_del(&device_cdev); //Remove device form kernel.
-		printk("%s , line=%d",__FUNCTION__,__LINE__);
+		printk("%s , line=%d\n",__FUNCTION__,__LINE__);
     device_destroy(my_first_class,device);
-		printk("%s , line=%d",__FUNCTION__,__LINE__);
+		printk("%s , line=%d\n",__FUNCTION__,__LINE__);
 		class_destroy(my_first_class);
-		printk("%s , line=%d",__FUNCTION__,__LINE__);
+		printk("%s , line=%d\n",__FUNCTION__,__LINE__);
     unregister_chrdev_region(device,CHAR_01_N_DEVS);//Release MAJOR and MINIOR Numbers.
 
 }

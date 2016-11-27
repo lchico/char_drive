@@ -20,8 +20,6 @@
 *   USAGE: ./test_module /dev/char_01
 */
 
-
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -50,8 +48,9 @@ int main (int argc, char ** argv){
 //  nbytes = read(fd,data,BUF_SIZE);
   while( strlen(data)< BUF_SIZE){
     scanf("%s",data);
-    printf("Valore recibido: %s\n",data);
-	  nbytes = write(fd,data,BUF_SIZE);
+//  printf("Valore recibido: %s\n",data);
+    nbytes = write(fd,data,strlen(data));
+    printf("Cantidad de valores copiados %i.\n",nbytes);
   }
 
   return 0;

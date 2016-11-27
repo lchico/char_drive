@@ -37,7 +37,7 @@ int main (int argc, char ** argv){
   char data[BUF_SIZE];
 
   if(argc < 2){
-    perror("usage: ./test_module /dev/[device_name]");
+    perror("usage: ./readers /dev/[device_name]");
     return -1;
   }
 
@@ -50,7 +50,8 @@ int main (int argc, char ** argv){
   nbytes=0;
   while( nbytes< BUF_SIZE){
     nbytes+= read(fd,data,BUF_SIZE);
-    printf("Leido:%s",data);
+    if (nbytes > 0)
+	printf("Leido:%s",data);
   }
 
 	data[5]='\0';
