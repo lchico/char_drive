@@ -47,7 +47,8 @@ int main (int argc, char ** argv){
   }
 //  nbytes = read(fd,data,BUF_SIZE);
   while( strlen(data)< BUF_SIZE){
-    scanf("%s",data);
+    //scanf("%s",data);
+    fgets(data,BUF_SIZE,stdin);
 //  printf("Valore recibido: %s\n",data);
     nbytes = write(fd,data,strlen(data));
     printf("Cantidad de valores copiados %i.\n",nbytes);

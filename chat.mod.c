@@ -33,6 +33,7 @@ __attribute__((section("__versions"))) = {
 	{ 0x43657bd1, __VMLINUX_SYMBOL_STR(kmalloc_caches) },
 	{ 0x9580deb, __VMLINUX_SYMBOL_STR(init_timer_key) },
 	{ 0x4f8b5ddb, __VMLINUX_SYMBOL_STR(_copy_to_user) },
+	{ 0x754d539c, __VMLINUX_SYMBOL_STR(strlen) },
 	{ 0x24428be5, __VMLINUX_SYMBOL_STR(strncpy_from_user) },
 	{ 0x27e1a049, __VMLINUX_SYMBOL_STR(printk) },
 	{ 0x16e5c2a, __VMLINUX_SYMBOL_STR(mod_timer) },
@@ -48,4 +49,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "C7C3932028C5AC3581167B7");
+MODULE_INFO(srcversion, "FA01FF46A6D1E405FC2242C");

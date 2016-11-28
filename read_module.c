@@ -20,8 +20,6 @@
 *   USAGE: ./test_module /dev/char_01
 */
 
-
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -33,7 +31,7 @@
 
 int main (int argc, char ** argv){
   int fd;
-  int index = 0, nbytes;
+  int index =-1, nbytes=0;
   char data[BUF_SIZE];
 
   if(argc < 2){
@@ -48,17 +46,16 @@ int main (int argc, char ** argv){
     return -1;
   }
   nbytes=0;
-  while( nbytes< BUF_SIZE){
+  while( index != 0){
     index=read(fd,data,BUF_SIZE);
     if (index > 0){
 	printf("Leido:%s, equivalen a %i\n",data,index);
 	printf("Nbytes: %i\n",nbytes);
 	nbytes+=index;
-	index=0;
-    }
-  } 
-
+    } 
+    sleep(1);
+  }
+  printf("Fin del lectura.\n");
 	
-  puts(data);
   return 0;
 }
