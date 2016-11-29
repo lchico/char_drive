@@ -63,7 +63,7 @@
 #define CHAR_01_N_DEVS 1    //Number o devices to register.
 #define NUM_BYTES_TO_COPY 1 //Number of bytes to copy in copy_to_user call.
 
-#define BUFFER_SIZE 20 //Number of bytes to copy in copy_to_user call.
+#define BUFFER_SIZE 21 //Number of bytes to copy in copy_to_user call.
 
 static char  *ptr_buffer=NULL;
 static char  *ptr_buffer_aux=NULL;
@@ -148,13 +148,9 @@ ssize_t dev_write(struct file *filp, const char __user *buf, size_t count, loff_
         printk("Memory ok.\n");
     }
 
-    if ( *f_pos >= BUFFER_SIZE -1 ){
-	printk("Buffer complet. Writer exit");
-	return 0;
-    }
-
-    if( *f_pos+count > BUFFER_SIZE -1){
-	count=BUFFER_SIZE - *f_pos;
+    // Only if the user wanna write overflow
+    if( *f_pos+count > BUFFER_SIZE - 2){
+	count=BUFFER_SIZE - *f_pos - 1 ; // this less 1 is \0 
     }
 
     spin_lock(&lock_buffer);
@@ -167,6 +163,11 @@ ssize_t dev_write(struct file *filp, const char __user *buf, size_t count, loff_
     }else{
         retval=count;
 	*f_pos+=count;
+    }
+    // This two is for leave \0 to end of each chat
+    if ( *f_pos >= BUFFER_SIZE -1 ){
+	printk("Buffer complet. Writer exit");
+	return 0;
     }
 
    // printk("Recibido de buffer user: %s\n",ptr_buf);    
@@ -183,14 +184,16 @@ ssize_t dev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_po
    printk(KERN_INFO "Count Parameter from user space %lu.\n", count);
    printk(KERN_INFO "Offset in buffer %lu.\n",(long unsigned int)*f_pos);
 
+   // Check if the offset is out of de buffer
+   if(*f_pos >= BUFFER_SIZE-1){
+	return 0;
+   }
+
    //printk("Buffer=%s, Posision del puntero:%lu\n",ptr_buffer_aux);
    if(*f_pos < strlen(ptr_buffer_aux)){
 	   spin_lock(&lock_buffer_aux);
-	   retval = copy_to_user((void *)buf,(const void *)(ptr_buffer_aux+*f_pos),(unsigned long)strlen(ptr_buffer_aux+*f_pos));
+	   retval = copy_to_user((void *)buf,(const void *)(ptr_buffer_aux+*f_pos),(unsigned long)strlen(ptr_buffer_aux+*f_pos+1)); // more one to put \0
 	   spin_unlock(&lock_buffer_aux);
-   }
-   if(*f_pos >= BUFFER_SIZE-1){
-	return 0;
    }
    if ( 0 == retval ){
 	retval=strlen(ptr_buffer_aux+*f_pos);

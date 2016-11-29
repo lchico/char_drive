@@ -50,8 +50,8 @@ int main (int argc, char ** argv){
     index=read(fd,data,BUF_SIZE);
     if (index > 0){
 	printf("Leido:%s, equivalen a %i\n",data,index);
-	printf("Nbytes: %i\n",nbytes);
 	nbytes+=index;
+	printf("Nbytes: %i\n",nbytes);
     } 
     sleep(1);
   }

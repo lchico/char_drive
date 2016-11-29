@@ -27,7 +27,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#define BUF_SIZE 16
+#define BUF_SIZE 20
 
 int main (int argc, char ** argv){
   int fd;
@@ -51,7 +51,7 @@ int main (int argc, char ** argv){
     fgets(data,BUF_SIZE,stdin);
 //  printf("Valore recibido: %s\n",data);
     nbytes = write(fd,data,strlen(data));
-    printf("Cantidad de valores copiados %i.\n",nbytes);
+    printf("Cantidad de valores copiados %lu.\n",strlen(data));
   }
   if (nbytes < 0 ){
 	printf("Error de la copia en el buffer del kernel.\n");
