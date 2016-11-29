@@ -31,7 +31,7 @@
 
 int main (int argc, char ** argv){
   int fd;
-  int index = 0, nbytes;
+  int index = 0, nbytes=1;
   char data[BUF_SIZE];
 
   if(argc < 2){
@@ -46,12 +46,17 @@ int main (int argc, char ** argv){
     return -1;
   }
 //  nbytes = read(fd,data,BUF_SIZE);
-  while( strlen(data)< BUF_SIZE){
+  while( nbytes > 0 ){
     //scanf("%s",data);
     fgets(data,BUF_SIZE,stdin);
 //  printf("Valore recibido: %s\n",data);
     nbytes = write(fd,data,strlen(data));
     printf("Cantidad de valores copiados %i.\n",nbytes);
+  }
+  if (nbytes < 0 ){
+	printf("Error de la copia en el buffer del kernel.\n");
+  }else{
+	printf("Fin del chat.\n");
   }
 
   return 0;

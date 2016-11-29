@@ -1,0 +1,7 @@
+*.bak
+*.ko
+*.swp
+*.order
+*.symvers
+*.mod.c
+1
