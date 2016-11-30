@@ -1,14 +1,14 @@
-cmd_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/chat_drv/chat.o := gcc -Wp,-MD,/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/chat_drv/.chat.o.d  -nostdinc -isystem /usr/lib/gcc/x86_64-linux-gnu/4.8/include  -I./arch/x86/include -Iarch/x86/include/generated/uapi -Iarch/x86/include/generated  -Iinclude -I./arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I./include/uapi -Iinclude/generated/uapi -include ./include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -std=gnu89 -m64 -falign-jumps=1 -falign-loops=1 -mno-80387 -mno-fp-ret-in-387 -mtune=generic -mno-red-zone -mcmodel=kernel -funit-at-a-time -maccumulate-outgoing-args -DCONFIG_X86_X32_ABI -DCONFIG_AS_FXSAVEQ=1 -DCONFIG_AS_SSSE3=1 -DCONFIG_AS_CRC32=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -fno-delete-null-pointer-checks -O2 --param=allow-store-data-races=0 -Wframe-larger-than=1024 -fstack-protector -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-var-tracking-assignments -pg -mfentry -DCC_USING_FENTRY -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -DCC_HAVE_ASM_GOTO  -DMODULE  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(chat)"  -D"KBUILD_MODNAME=KBUILD_STR(chat)" -c -o /home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/chat_drv/.tmp_chat.o /home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/chat_drv/chat.c
+cmd_/home/luis/Documents/Especializacion/Implementacion_Drivers_I/char_drive/chat.o := gcc -Wp,-MD,/home/luis/Documents/Especializacion/Implementacion_Drivers_I/char_drive/.chat.o.d  -nostdinc -isystem /usr/lib/gcc/x86_64-linux-gnu/4.8/include  -I./arch/x86/include -Iarch/x86/include/generated/uapi -Iarch/x86/include/generated  -Iinclude -I./arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I./include/uapi -Iinclude/generated/uapi -include ./include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -fno-pie -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -std=gnu89 -fno-pie -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -m64 -falign-jumps=1 -falign-loops=1 -mno-80387 -mno-fp-ret-in-387 -mpreferred-stack-boundary=3 -mtune=generic -mno-red-zone -mcmodel=kernel -funit-at-a-time -maccumulate-outgoing-args -DCONFIG_X86_X32_ABI -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_FXSAVEQ=1 -DCONFIG_AS_SSSE3=1 -DCONFIG_AS_CRC32=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -DCONFIG_AS_SHA1_NI=1 -DCONFIG_AS_SHA256_NI=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -fno-delete-null-pointer-checks -Wno-maybe-uninitialized -O2 --param=allow-store-data-races=0 -Wframe-larger-than=1024 -fstack-protector -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-var-tracking-assignments -pg -mfentry -DCC_USING_FENTRY -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -DCC_HAVE_ASM_GOTO  -DMODULE  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(chat)"  -D"KBUILD_MODNAME=KBUILD_STR(chat)" -c -o /home/luis/Documents/Especializacion/Implementacion_Drivers_I/char_drive/.tmp_chat.o /home/luis/Documents/Especializacion/Implementacion_Drivers_I/char_drive/chat.c
 
-source_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/chat_drv/chat.o := /home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/chat_drv/chat.c
+source_/home/luis/Documents/Especializacion/Implementacion_Drivers_I/char_drive/chat.o := /home/luis/Documents/Especializacion/Implementacion_Drivers_I/char_drive/chat.c
 
-deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/chat_drv/chat.o := \
+deps_/home/luis/Documents/Especializacion/Implementacion_Drivers_I/char_drive/chat.o := \
   include/linux/module.h \
     $(wildcard include/config/modules.h) \
     $(wildcard include/config/sysfs.h) \
-    $(wildcard include/config/unused/symbols.h) \
     $(wildcard include/config/module/sig.h) \
     $(wildcard include/config/modules/tree/lookup.h) \
+    $(wildcard include/config/unused/symbols.h) \
     $(wildcard include/config/generic/bug.h) \
     $(wildcard include/config/kallsyms.h) \
     $(wildcard include/config/smp.h) \
@@ -23,6 +23,7 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
   include/linux/list.h \
     $(wildcard include/config/debug/list.h) \
   include/linux/types.h \
+    $(wildcard include/config/have/uid16.h) \
     $(wildcard include/config/uid16.h) \
     $(wildcard include/config/lbdaf.h) \
     $(wildcard include/config/arch/dma/addr/t/64bit.h) \
@@ -43,6 +44,7 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/sparse/rcu/pointer.h) \
     $(wildcard include/config/trace/branch/profiling.h) \
     $(wildcard include/config/profile/all/branches.h) \
+    $(wildcard include/config/kasan.h) \
     $(wildcard include/config/enable/must/check.h) \
     $(wildcard include/config/enable/warn/deprecated.h) \
     $(wildcard include/config/kprobes.h) \
@@ -92,7 +94,6 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/physical/start.h) \
     $(wildcard include/config/physical/align.h) \
   arch/x86/include/asm/page_64_types.h \
-    $(wildcard include/config/kasan.h) \
     $(wildcard include/config/randomize/base.h) \
     $(wildcard include/config/randomize/base/max/offset.h) \
   arch/x86/include/uapi/asm/ptrace.h \
@@ -123,27 +124,26 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
   include/asm-generic/qspinlock_types.h \
   include/asm-generic/qrwlock_types.h \
   include/asm-generic/ptrace.h \
-  arch/x86/include/asm/cpufeature.h \
-    $(wildcard include/config/x86/feature/names.h) \
-    $(wildcard include/config/x86/debug/static/cpu/has.h) \
-  arch/x86/include/asm/required-features.h \
-    $(wildcard include/config/x86/minimum/cpu/family.h) \
-    $(wildcard include/config/math/emulation.h) \
-    $(wildcard include/config/x86/cmpxchg64.h) \
-    $(wildcard include/config/x86/use/3dnow.h) \
-    $(wildcard include/config/x86/p6/nop.h) \
-    $(wildcard include/config/matom.h) \
-  arch/x86/include/asm/disabled-features.h \
-    $(wildcard include/config/x86/intel/mpx.h) \
   arch/x86/include/asm/rmwcc.h \
   arch/x86/include/asm/barrier.h \
     $(wildcard include/config/x86/ppro/fence.h) \
   arch/x86/include/asm/nops.h \
     $(wildcard include/config/mk7.h) \
+    $(wildcard include/config/x86/p6/nop.h) \
+  include/asm-generic/barrier.h \
   include/asm-generic/bitops/find.h \
     $(wildcard include/config/generic/find/first/bit.h) \
   include/asm-generic/bitops/sched.h \
   arch/x86/include/asm/arch_hweight.h \
+  arch/x86/include/asm/cpufeatures.h \
+  arch/x86/include/asm/required-features.h \
+    $(wildcard include/config/x86/minimum/cpu/family.h) \
+    $(wildcard include/config/math/emulation.h) \
+    $(wildcard include/config/x86/cmpxchg64.h) \
+    $(wildcard include/config/x86/use/3dnow.h) \
+    $(wildcard include/config/matom.h) \
+  arch/x86/include/asm/disabled-features.h \
+    $(wildcard include/config/x86/intel/mpx.h) \
   include/asm-generic/bitops/const_hweight.h \
   include/asm-generic/bitops/le.h \
   arch/x86/include/uapi/asm/byteorder.h \
@@ -218,15 +218,23 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/discontigmem.h) \
     $(wildcard include/config/sparsemem/vmemmap.h) \
   include/asm-generic/getorder.h \
+  arch/x86/include/asm/cpufeature.h \
+    $(wildcard include/config/x86/feature/names.h) \
+    $(wildcard include/config/x86/debug/static/cpu/has.h) \
   arch/x86/include/asm/processor.h \
     $(wildcard include/config/m486.h) \
     $(wildcard include/config/xen.h) \
   arch/x86/include/asm/math_emu.h \
-  arch/x86/include/asm/sigcontext.h \
   arch/x86/include/uapi/asm/sigcontext.h \
   arch/x86/include/asm/current.h \
   arch/x86/include/asm/msr.h \
   arch/x86/include/asm/msr-index.h \
+    $(wildcard include/config/tdp/nominal.h) \
+    $(wildcard include/config/tdp/level/1.h) \
+    $(wildcard include/config/tdp/level/2.h) \
+    $(wildcard include/config/tdp/control.h) \
+    $(wildcard include/config/tdp/level1.h) \
+    $(wildcard include/config/tdp/level2.h) \
   arch/x86/include/uapi/asm/errno.h \
   include/uapi/asm-generic/errno.h \
   include/uapi/asm-generic/errno-base.h \
@@ -262,7 +270,6 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/trace/irqflags/support.h) \
   arch/x86/include/asm/irqflags.h \
   include/linux/atomic.h \
-    $(wildcard include/config/arch/has/atomic/or.h) \
     $(wildcard include/config/generic/atomic64.h) \
   arch/x86/include/asm/atomic.h \
   arch/x86/include/asm/cmpxchg.h \
@@ -325,6 +332,7 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/highmem.h) \
     $(wildcard include/config/zone/dma.h) \
     $(wildcard include/config/zone/dma32.h) \
+    $(wildcard include/config/zone/device.h) \
     $(wildcard include/config/numa.h) \
     $(wildcard include/config/deferred/struct/page/init.h) \
     $(wildcard include/config/pm/sleep.h) \
@@ -337,7 +345,6 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/memcg.h) \
     $(wildcard include/config/memory/hotplug.h) \
     $(wildcard include/config/compaction.h) \
-    $(wildcard include/config/have/memblock/node/map.h) \
     $(wildcard include/config/flat/node/mem/map.h) \
     $(wildcard include/config/page/extension.h) \
     $(wildcard include/config/no/bootmem.h) \
@@ -345,6 +352,7 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/have/memory/present.h) \
     $(wildcard include/config/have/memoryless/nodes.h) \
     $(wildcard include/config/need/node/memmap/size.h) \
+    $(wildcard include/config/have/memblock/node/map.h) \
     $(wildcard include/config/need/multiple/nodes.h) \
     $(wildcard include/config/have/arch/early/pfn/to/nid.h) \
     $(wildcard include/config/sparsemem/extreme.h) \
@@ -384,7 +392,7 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/preempt/rcu.h) \
     $(wildcard include/config/rcu/trace.h) \
     $(wildcard include/config/rcu/stall/common.h) \
-    $(wildcard include/config/rcu/user/qs.h) \
+    $(wildcard include/config/no/hz/full.h) \
     $(wildcard include/config/rcu/nocb/cpu.h) \
     $(wildcard include/config/tasks/rcu.h) \
     $(wildcard include/config/debug/objects/rcu/head.h) \
@@ -466,6 +474,7 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/pci/mmconfig.h) \
     $(wildcard include/config/x86/intel/mid.h) \
   arch/x86/include/asm/acpi.h \
+    $(wildcard include/config/acpi/apei.h) \
     $(wildcard include/config/acpi.h) \
     $(wildcard include/config/acpi/numa.h) \
   include/acpi/pdc_intel.h \
@@ -503,7 +512,7 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
   include/linux/clocksource.h \
     $(wildcard include/config/arch/clocksource/data.h) \
     $(wildcard include/config/clocksource/watchdog.h) \
-    $(wildcard include/config/clksrc/of.h) \
+    $(wildcard include/config/clksrc/probe.h) \
   arch/x86/include/asm/clocksource.h \
   arch/x86/include/uapi/asm/vsyscall.h \
   include/asm-generic/fixmap.h \
@@ -537,6 +546,7 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/have/cmpxchg/double.h) \
     $(wildcard include/config/have/aligned/struct/page.h) \
     $(wildcard include/config/transparent/hugepage.h) \
+    $(wildcard include/config/userfaultfd.h) \
     $(wildcard include/config/aio.h) \
     $(wildcard include/config/mmu/notifier.h) \
   include/linux/auxvec.h \
@@ -620,6 +630,7 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
   include/uapi/linux/fiemap.h \
   include/linux/migrate_mode.h \
   include/linux/percpu-rwsem.h \
+  include/linux/rcu_sync.h \
   include/linux/blk_types.h \
     $(wildcard include/config/blk/cgroup.h) \
     $(wildcard include/config/blk/dev/integrity.h) \
@@ -646,17 +657,17 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/lockup/detector.h) \
     $(wildcard include/config/detect/hung/task.h) \
     $(wildcard include/config/core/dump/default/elf/headers.h) \
-    $(wildcard include/config/sched/autogroup.h) \
     $(wildcard include/config/virt/cpu/accounting/native.h) \
+    $(wildcard include/config/sched/autogroup.h) \
     $(wildcard include/config/bsd/process/acct.h) \
     $(wildcard include/config/taskstats.h) \
     $(wildcard include/config/audit.h) \
-    $(wildcard include/config/cgroups.h) \
     $(wildcard include/config/inotify/user.h) \
     $(wildcard include/config/fanotify.h) \
     $(wildcard include/config/posix/mqueue.h) \
     $(wildcard include/config/keys.h) \
     $(wildcard include/config/perf/events.h) \
+    $(wildcard include/config/bpf/syscall.h) \
     $(wildcard include/config/sched/info.h) \
     $(wildcard include/config/task/delay/acct.h) \
     $(wildcard include/config/schedstats.h) \
@@ -672,7 +683,9 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/rt/mutexes.h) \
     $(wildcard include/config/task/xacct.h) \
     $(wildcard include/config/cpusets.h) \
+    $(wildcard include/config/cgroups.h) \
     $(wildcard include/config/futex.h) \
+    $(wildcard include/config/arch/want/batched/unmap/tlb/flush.h) \
     $(wildcard include/config/fault/injection.h) \
     $(wildcard include/config/latencytop.h) \
     $(wildcard include/config/function/graph/tracer.h) \
@@ -680,7 +693,6 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/arch/wants/dynamic/task/struct.h) \
     $(wildcard include/config/have/unstable/sched/clock.h) \
     $(wildcard include/config/irq/time/accounting.h) \
-    $(wildcard include/config/no/hz/full.h) \
     $(wildcard include/config/stack/growsup.h) \
     $(wildcard include/config/have/copy/thread/tls.h) \
   include/uapi/linux/sched.h \
@@ -718,6 +730,7 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/seccomp.h) \
     $(wildcard include/config/have/arch/seccomp/filter.h) \
     $(wildcard include/config/seccomp/filter.h) \
+    $(wildcard include/config/checkpoint/restore.h) \
   include/uapi/linux/seccomp.h \
   arch/x86/include/asm/seccomp.h \
   arch/x86/include/asm/unistd.h \
@@ -737,6 +750,7 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
   include/uapi/asm-generic/resource.h \
   include/linux/hrtimer.h \
     $(wildcard include/config/high/res/timers.h) \
+    $(wildcard include/config/time/low/res.h) \
     $(wildcard include/config/timerfd.h) \
   include/linux/timerqueue.h \
   include/linux/task_io_accounting.h \
@@ -760,6 +774,7 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
     $(wildcard include/config/cgroup/perf.h) \
     $(wildcard include/config/cgroup/net/prio.h) \
     $(wildcard include/config/cgroup/hugetlb.h) \
+    $(wildcard include/config/cgroup/pids.h) \
     $(wildcard include/config/cgroup/debug.h) \
   arch/x86/include/asm/uaccess.h \
     $(wildcard include/config/x86/intel/usercopy.h) \
@@ -770,7 +785,9 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
   include/generated/uapi/linux/version.h \
   include/linux/device.h \
     $(wildcard include/config/debug/devres.h) \
+    $(wildcard include/config/generic/msi/irq/domain.h) \
     $(wildcard include/config/pinctrl.h) \
+    $(wildcard include/config/generic/msi/irq.h) \
     $(wildcard include/config/dma/cma.h) \
     $(wildcard include/config/of.h) \
     $(wildcard include/config/devtmpfs.h) \
@@ -795,7 +812,6 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
   include/linux/kmemleak.h \
     $(wildcard include/config/debug/kmemleak.h) \
   include/linux/kasan.h \
-    $(wildcard include/config/kasan/shadow/offset.h) \
   include/linux/pagemap.h \
   include/linux/mm.h \
     $(wildcard include/config/ppc.h) \
@@ -808,17 +824,18 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
   include/linux/debug_locks.h \
     $(wildcard include/config/debug/locking/api/selftests.h) \
   include/linux/page_ext.h \
+    $(wildcard include/config/idle/page/tracking.h) \
     $(wildcard include/config/page/owner.h) \
   include/linux/stacktrace.h \
     $(wildcard include/config/stacktrace.h) \
     $(wildcard include/config/user/stacktrace/support.h) \
   arch/x86/include/asm/pgtable.h \
+    $(wildcard include/config/debug/wx.h) \
     $(wildcard include/config/have/arch/soft/dirty.h) \
   arch/x86/include/asm/pgtable_64.h \
   include/asm-generic/pgtable.h \
     $(wildcard include/config/have/arch/huge/vmap.h) \
   include/linux/page-flags.h \
-    $(wildcard include/config/pageflags/extended.h) \
     $(wildcard include/config/arch/uses/pg/uncached.h) \
     $(wildcard include/config/memory/failure.h) \
     $(wildcard include/config/swap.h) \
@@ -876,6 +893,6 @@ deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/c
   include/asm-generic/cacheflush.h \
   include/linux/hugetlb_inline.h \
 
-/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/chat_drv/chat.o: $(deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/chat_drv/chat.o)
+/home/luis/Documents/Especializacion/Implementacion_Drivers_I/char_drive/chat.o: $(deps_/home/luis/Documents/Especializacion/Implementacion_Drivers_I/char_drive/chat.o)
 
-$(deps_/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/chat_drv/chat.o):
+$(deps_/home/luis/Documents/Especializacion/Implementacion_Drivers_I/char_drive/chat.o):

@@ -96,7 +96,7 @@ void cp_buffers( unsigned long data )
   memcpy(ptr_buffer_r, ptr_buffer_aux,BUFFER_SIZE);
   spin_unlock(&lock_buffer_aux);
  
-  //printk("Buffer=%s\n",ptr_buffer_aux);
+  //printk("Buffer=%s\n",ptr_buffer_r);
  
   ret = mod_timer( &timer_cpy_buffers, jiffies + msecs_to_jiffies(800) );
   if (ret) printk("Error in mod_timer\n");
@@ -192,7 +192,7 @@ ssize_t dev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_po
    //printk("Buffer=%s, Posision del puntero:%lu\n",ptr_buffer_aux);
    if(*f_pos < strlen(ptr_buffer_aux)){
 	   spin_lock(&lock_buffer_aux);
-	   retval = copy_to_user((void *)buf,(const void *)(ptr_buffer_aux+*f_pos),(unsigned long)strlen(ptr_buffer_aux+*f_pos+1)); // more one to put \0
+	   retval = copy_to_user((void *)buf,(const void *)(ptr_buffer_r+*f_pos),(unsigned long)strlen(ptr_buffer_r+*f_pos+1)); // more one to put \0
 	   spin_unlock(&lock_buffer_aux);
    }
    if ( 0 == retval ){

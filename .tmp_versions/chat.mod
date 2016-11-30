@@ -1,2 +1,2 @@
-/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/chat_drv/chat.ko
-/home/lchico/Documents/Especializacion/Implementacion_de_drivers/Cristian/chat_drv/chat.o
+/home/luis/Documents/Especializacion/Implementacion_Drivers_I/char_drive/chat.ko
+/home/luis/Documents/Especializacion/Implementacion_Drivers_I/char_drive/chat.o
