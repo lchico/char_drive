@@ -40,12 +40,12 @@
 #include <linux/device.h>
 #include <linux/atomic.h>
 #include <asm/atomic.h>
+
 #include <linux/spinlock.h>
-#include <linux/smp.h>
+#include <linux/mutex.h>
 
 #include <linux/slab.h>  // to use kmalloc and kfree
 #include <linux/errno.h>  // to use errors define
-//#include <linux/errno-base.h>  // to use errors define
 
 #include <linux/hrtimer.h>
 #include <linux/pagemap.h>
@@ -65,12 +65,17 @@
 
 #define BUFFER_SIZE 21 //Number of bytes to copy in copy_to_user call.
 
-static char  *ptr_buffer=NULL;
+static char  *ptr_buffer_in=NULL;
 static char  *ptr_buffer_aux=NULL;
-static char  *ptr_buffer_r=NULL;
-static atomic_t nro_user=ATOMIC_INIT(0);
+static char  *ptr_buffer_out=NULL;
+static atomic_t nro_user=ATOMIC_INIT(-1);
 
+struct mutex mutex_buffer_in;
+struct mutex mutex_buffer_out;
+struct mutex mutex_read_sync;
 
+static loff_t index_writer=0;
+static loff_t index_last_writer=0;
 static struct timer_list timer_cpy_buffers;
 
 static dev_t device;        //This variable stores the minor and major mumber of the device
@@ -84,24 +89,23 @@ spinlock_t lock_buffer_aux;
 void cp_buffers( unsigned long data )
 {
   int ret;
+  unsigned int diff_aux=0;
   
+  diff_aux=index_writer-index_last_writer;
+  printk("diff=%lu\n",diff_aux);
+  if ( diff_aux > 0 ){
+	spin_lock(&lock_buffer);
+	memcpy(ptr_buffer_aux, ptr_buffer_in+index_last_writer,diff_aux);
+	spin_unlock(&lock_buffer);
 
-  //printk("Buffer=%s\n",ptr_buffer);
-  spin_lock(&lock_buffer);
-  memcpy(ptr_buffer_aux, ptr_buffer,BUFFER_SIZE);
-  spin_unlock(&lock_buffer);
-
-
-  spin_lock(&lock_buffer_aux);
-  memcpy(ptr_buffer_r, ptr_buffer_aux,BUFFER_SIZE);
-  spin_unlock(&lock_buffer_aux);
- 
-  //printk("Buffer=%s\n",ptr_buffer_aux);
- 
+  	spin_lock(&lock_buffer_aux);
+ 	memcpy(ptr_buffer_out, ptr_buffer_aux+index_last_writer,diff_aux);
+ 	spin_unlock(&lock_buffer_aux);
+  	index_last_writer+=diff_aux;
+	mutex_unlock(&mutex_read_sync);
+  }
   ret = mod_timer( &timer_cpy_buffers, jiffies + msecs_to_jiffies(800) );
   if (ret) printk("Error in mod_timer\n");
-//  printk("Timer update\n");
-
 }
 
 
@@ -142,7 +146,7 @@ ssize_t dev_write(struct file *filp, const char __user *buf, size_t count, loff_
     printk(KERN_INFO "Count Parameter from user space %lu.\n", count);
     printk(KERN_INFO "Offset in buffer %lu.\n",(long unsigned int)*f_pos);
     ///////////////////////////////////////////////////
-    if (!ptr_buffer){
+    if (!ptr_buffer_in){
         printk("Error call mallok, %s, %i\n",__FUNCTION__,__LINE__);
     }else{
         printk("Memory ok.\n");
@@ -151,11 +155,15 @@ ssize_t dev_write(struct file *filp, const char __user *buf, size_t count, loff_
     // Only if the user wanna write overflow
     if( *f_pos+count > BUFFER_SIZE - 2){
 	count=BUFFER_SIZE - *f_pos - 1 ; // this less 1 is \0 
-    }
+    }else{// error en el tamanio del buffer
+}
 
-    spin_lock(&lock_buffer);
-    retval=strncpy_from_user(ptr_buffer+*f_pos,buf,count);
-    spin_unlock(&lock_buffer);
+//    spin_lock(&lock_buffer); // Este no libera hasta tomar el semaforo, con lo cual no conmuta el scheduler(Usar solo en caso de inrettupciones de hardware). Por ello usar mutex(todo lo que sea necesario interactuar con el usuario). Si esta bloqueado pone a dormir el proceso hasta que sea libreado
+
+	//mutex
+    mutex_lock(&mutex_buffer_in);
+    retval=copy_from_user(ptr_buffer_in+*f_pos,buf,count);
+    mutex_unlock(&mutex_buffer_in);
 
     if( retval < 0 ){
         printk("Error copy from user, %s, %i\n",__FUNCTION__,__LINE__);
@@ -163,6 +171,7 @@ ssize_t dev_write(struct file *filp, const char __user *buf, size_t count, loff_
     }else{
         retval=count;
 	*f_pos+=count;
+	index_writer=count;
     }
     // This two is for leave \0 to end of each chat
     if ( *f_pos >= BUFFER_SIZE -1 ){
@@ -171,7 +180,7 @@ ssize_t dev_write(struct file *filp, const char __user *buf, size_t count, loff_
     }
 
    // printk("Recibido de buffer user: %s\n",ptr_buf);    
-    printk("Valores offset  %lu, %s\n",i,ptr_buffer);
+    printk("Valores offset  %lu, %s\n",i,ptr_buffer_in);
 	
     return retval;  // returned a single character. Ok
 }
@@ -179,6 +188,8 @@ ssize_t dev_write(struct file *filp, const char __user *buf, size_t count, loff_
 // Read function //
 ssize_t dev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
    long int retval=-1;
+   loff_t diff_aux=0;
+   char *buffer_reader; 
    /////Some info printed in /var/log/messages ///////
    printk(KERN_INFO "Entering dev_read function\n");
    printk(KERN_INFO "Count Parameter from user space %lu.\n", count);
@@ -189,17 +200,33 @@ ssize_t dev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_po
 	return 0;
    }
 
+   printk("Blockeo de sync.\n");
+   mutex_lock(&mutex_read_sync);
+   printk("Salgo del blockeo de sync.\n");
+   /* Diferencia entre lo leido y si hay datos por leer del buffer */
+   diff_aux=index_last_writer-*f_pos;
+
    //printk("Buffer=%s, Posision del puntero:%lu\n",ptr_buffer_aux);
-   if(*f_pos < strlen(ptr_buffer_aux)){
-	   spin_lock(&lock_buffer_aux);
-	   retval = copy_to_user((void *)buf,(const void *)(ptr_buffer_aux+*f_pos),(unsigned long)strlen(ptr_buffer_aux+*f_pos+1)); // more one to put \0
-	   spin_unlock(&lock_buffer_aux);
+
+   if ( (buffer_reader = kzalloc(sizeof(char)*diff_aux, GFP_KERNEL)) ){
+	printk("Error calling kzalloc %s, %i .\n",__FUNCTION__,__LINE__);
    }
+
+   mutex_lock(&mutex_buffer_out);
+   memcpy(buffer_reader,ptr_buffer_out+*f_pos,diff_aux);
+   mutex_unlock(&mutex_buffer_out);
+
+   mutex_unlock(&mutex_read_sync);
+
+   retval = copy_to_user((char *)buf,buffer_reader,diff_aux); 
+
+   kfree(buffer_reader);
+
    if ( 0 == retval ){
-	retval=strlen(ptr_buffer_aux+*f_pos);
+	retval=diff_aux;
 	*f_pos+=retval;
-   }else if(retval >0){
-	retval=strlen(ptr_buffer_aux+*f_pos)-retval;
+   }else if( retval >0 ){
+	retval=diff_aux-retval;
 	*f_pos+=retval;
    	printk("retval mayor q 0=%lu\n",retval);
    }else{
@@ -211,30 +238,38 @@ ssize_t dev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_po
 }
 
 int open(struct inode * no,struct file *fd){
-	
+	int retval;	
     //printk("Ingreo Open Function.\n  Nro user: %i\n",atomic_read(&nro_user));
     spin_lock_init(&lock_buffer);
     spin_lock_init(&lock_buffer_aux);
 
-    if(atomic_read(&nro_user) == 0){
-        ptr_buffer = kmalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
-        ptr_buffer_aux = kmalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
-        ptr_buffer_r = kmalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
-        if ( !ptr_buffer && !ptr_buffer_aux &&  !ptr_buffer_r ){
+    mutex_init(&mutex_buffer_in);
+    mutex_init(&mutex_buffer_out);
+    mutex_init(&mutex_read_sync);
+    mutex_lock(&mutex_read_sync);
+	
+
+// necesito que sea todo atomico por lo tanto la comparacion decrementar
+    if(atomic_inc_and_test(&nro_user)){ // 
+        ptr_buffer_in = kzalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
+        ptr_buffer_aux = kzalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
+        ptr_buffer_out = kzalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
+        if ( !ptr_buffer_in || !ptr_buffer_aux ||  !ptr_buffer_out ){
             printk("Error call mallok, %s, %i\n",__FUNCTION__,__LINE__);
+	    retval=-1;
         }else{
             printk("Ingreso el escritor del grupo.Mem OK\n");
-	    memset(ptr_buffer,0,BUFFER_SIZE);
-	    memset(ptr_buffer_aux,0,BUFFER_SIZE);
-	    memset(ptr_buffer_r,0,BUFFER_SIZE);
             // Init timer to copy buffer from kernel buffer to the kernel buffer 
-            init_module_timer( );
+            init_module_timer( );// ver error
+	    index_writer=0;
+	    index_last_writer=0;
+	    retval=0;
         }    	
     }else{
             printk("Ingreso del lector nro: %i\n",atomic_read(&nro_user));
+	    retval=0;
     }
-    atomic_inc(&nro_user);
-    return 0;
+    return retval; // ver q retorna
 }
 
 
@@ -246,14 +281,15 @@ int chat_close(struct inode *inode, struct file *flip){
     }else{
         printk("El escrito dejo el chat.\n");
 
-        if (ptr_buffer){
+        if (ptr_buffer_in){
             cleanup_module_timmer();
-            kfree(ptr_buffer);
+            kfree(ptr_buffer_in);
+            kfree(ptr_buffer_aux);
+            kfree(ptr_buffer_out);
         }
     }
     return 0;
 }
-
 
 struct file_operations dev_fops = { //Struct File Operations, this module only supports read...
 	.owner = THIS_MODULE,           // Tells who is owner of struct file_operations
