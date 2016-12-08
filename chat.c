@@ -89,21 +89,29 @@ spinlock_t lock_buffer_aux;
 void cp_buffers( unsigned long data )
 {
   int ret;
-  unsigned int diff_aux=0;
+  loff_t diff_aux=0;
   
   diff_aux=index_writer-index_last_writer;
-  printk("diff=%lu\n",diff_aux);
   if ( diff_aux > 0 ){
-	spin_lock(&lock_buffer);
-	memcpy(ptr_buffer_aux, ptr_buffer_in+index_last_writer,diff_aux);
-	spin_unlock(&lock_buffer);
+	printk("Diff= %lld\n",diff_aux);
+	//spin_lock(&lock_buffer); /* Cristian esto lo hablamos pero despues me quede pensand oy como necesito que el recurso quede protegido me parece que no tiene sentido si utilizo distintos mecanismo para sincronizar un recurso. Es decir no podria utilizar mutex y aqui espinlock ya que seria uno independiente del otro */
+        mutex_lock(&mutex_buffer_in);
+	memcpy(ptr_buffer_aux+index_last_writer, ptr_buffer_in+index_last_writer,diff_aux);
+        mutex_unlock(&mutex_buffer_in);
+	//spin_unlock(&lock_buffer);
 
-  	spin_lock(&lock_buffer_aux);
- 	memcpy(ptr_buffer_out, ptr_buffer_aux+index_last_writer,diff_aux);
- 	spin_unlock(&lock_buffer_aux);
+ printk("Timer index_last:%lld  index:  %llu,buff_aux:  %s\n",index_last_writer,index_writer,ptr_buffer_aux);
+  	//spin_lock(&lock_buffer_aux);
+        mutex_lock(&mutex_buffer_out);
+ 	memcpy(ptr_buffer_out+index_last_writer, ptr_buffer_aux+index_last_writer,diff_aux);
+        mutex_unlock(&mutex_buffer_out);
+ 	//spin_unlock(&lock_buffer_aux);
   	index_last_writer+=diff_aux;
-	mutex_unlock(&mutex_read_sync);
+ printk("Timer index_last:%lld  index:  %llu,buff:  %s\n",index_last_writer,index_writer,ptr_buffer_out);
+
+	printk("Timer Desbloqueo reader mutex.\n");
   }
+  mutex_unlock(&mutex_read_sync);
   ret = mod_timer( &timer_cpy_buffers, jiffies + msecs_to_jiffies(800) );
   if (ret) printk("Error in mod_timer\n");
 }
@@ -140,19 +148,18 @@ void cleanup_module_timmer( void )
 // Write function //
 ssize_t dev_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos) {
     ssize_t retval=-ENOMEM;
-    unsigned long i=0;
     /////Some info printed in /var/log/messages ///////
-    printk(KERN_INFO "Entering dev_write function\n");
-    printk(KERN_INFO "Count Parameter from user space %lu.\n", count);
-    printk(KERN_INFO "Offset in buffer %lu.\n",(long unsigned int)*f_pos);
+    printk(KERN_INFO "Writer_Entering dev_write function\n");
+    printk(KERN_INFO "Writer_Count Parameter from user space %lu.\n", count);
+    printk(KERN_INFO "Writer_Offset in buffer %lu.\n",(long unsigned int)*f_pos);
     ///////////////////////////////////////////////////
     if (!ptr_buffer_in){
-        printk("Error call mallok, %s, %i\n",__FUNCTION__,__LINE__);
+        printk("Writer_call mallok, %s, %i\n",__FUNCTION__,__LINE__);
     }else{
-        printk("Memory ok.\n");
+        printk("Writer__Memory ok.\n");
     }
 
-    // Only if the user wanna write overflow
+    // Check if user wanna write overflow
     if( *f_pos+count > BUFFER_SIZE - 2){
 	count=BUFFER_SIZE - *f_pos - 1 ; // this less 1 is \0 
     }else{// error en el tamanio del buffer
@@ -166,21 +173,21 @@ ssize_t dev_write(struct file *filp, const char __user *buf, size_t count, loff_
     mutex_unlock(&mutex_buffer_in);
 
     if( retval < 0 ){
-        printk("Error copy from user, %s, %i\n",__FUNCTION__,__LINE__);
+        printk("Writer_Error copy from user, %s, %i\n",__FUNCTION__,__LINE__);
 	retval=-EFAULT;
     }else{
         retval=count;
-	*f_pos+=count;
-	index_writer=count;
+	*f_pos+=(loff_t)count;
+	index_writer=*f_pos;
     }
     // This two is for leave \0 to end of each chat
     if ( *f_pos >= BUFFER_SIZE -1 ){
-	printk("Buffer complet. Writer exit");
+	printk("Writer_Buffer complet. Writer exit.\n");
 	return 0;
     }
 
    // printk("Recibido de buffer user: %s\n",ptr_buf);    
-    printk("Valores offset  %lu, %s\n",i,ptr_buffer_in);
+    printk("Writer_Index_writer:%lld  offset  %llu, %s\n",index_writer,*f_pos,ptr_buffer_in);
 	
     return retval;  // returned a single character. Ok
 }
@@ -191,35 +198,43 @@ ssize_t dev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_po
    loff_t diff_aux=0;
    char *buffer_reader; 
    /////Some info printed in /var/log/messages ///////
-   printk(KERN_INFO "Entering dev_read function\n");
-   printk(KERN_INFO "Count Parameter from user space %lu.\n", count);
-   printk(KERN_INFO "Offset in buffer %lu.\n",(long unsigned int)*f_pos);
+   printk(KERN_INFO "Read_Entering dev_read function\n");
+   printk(KERN_INFO "Read_Count Parameter from user space %lu.\n", count);
+   printk(KERN_INFO "Read_Offset in buffer %lu.\n",(long unsigned int)*f_pos);
 
    // Check if the offset is out of de buffer
-   if(*f_pos >= BUFFER_SIZE-1){
+   if(*f_pos >= BUFFER_SIZE-2){
 	return 0;
    }
 
-   printk("Blockeo de sync.\n");
-   mutex_lock(&mutex_read_sync);
-   printk("Salgo del blockeo de sync.\n");
-   /* Diferencia entre lo leido y si hay datos por leer del buffer */
+	
    diff_aux=index_last_writer-*f_pos;
-
-   //printk("Buffer=%s, Posision del puntero:%lu\n",ptr_buffer_aux);
-
-   if ( (buffer_reader = kzalloc(sizeof(char)*diff_aux, GFP_KERNEL)) ){
-	printk("Error calling kzalloc %s, %i .\n",__FUNCTION__,__LINE__);
+   while(diff_aux < 1 ){
+	printk("Read_Blockeo de sync.\n");
+	mutex_lock(&mutex_read_sync);
+	printk("Read_Salgo del blockeo de sync.\n");
+        diff_aux=index_last_writer-*f_pos;
+	/* Diferencia entre lo leido y si hay datos por leer del buffer */
    }
 
+   printk("Read_Diff= %lld\n",diff_aux);
+   mutex_unlock(&mutex_read_sync);
+   
+   //printk("Buffer=%s, Posision del puntero:%lu\n",ptr_buffer_aux);
+
+   if ( !(buffer_reader = kzalloc(sizeof(char)*diff_aux, GFP_KERNEL)) ){
+	printk("Read_Error calling kzalloc %s, %i .\n",__FUNCTION__,__LINE__);
+   }
+
+   printk("Buffer ptr_buffer out before cpy:  %s\n",(ptr_buffer_out+*f_pos));
    mutex_lock(&mutex_buffer_out);
    memcpy(buffer_reader,ptr_buffer_out+*f_pos,diff_aux);
    mutex_unlock(&mutex_buffer_out);
 
-   mutex_unlock(&mutex_read_sync);
 
    retval = copy_to_user((char *)buf,buffer_reader,diff_aux); 
 
+   printk("Buffer readers changer:  %s\n",buffer_reader);
    kfree(buffer_reader);
 
    if ( 0 == retval ){
@@ -228,12 +243,12 @@ ssize_t dev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_po
    }else if( retval >0 ){
 	retval=diff_aux-retval;
 	*f_pos+=retval;
-   	printk("retval mayor q 0=%lu\n",retval);
+   	printk("Read_retval mayor q 0=%lu\n",retval);
    }else{
 	retval=-1;
    }
    
-   printk("retval=%lu\n",retval);
+   printk("Read_retval=%lu\n",retval);
    return retval;  // returned a single character. Ok
 }
 
@@ -254,19 +269,21 @@ int open(struct inode * no,struct file *fd){
         ptr_buffer_in = kzalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
         ptr_buffer_aux = kzalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
         ptr_buffer_out = kzalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
+//	fd->f_pos=0;
         if ( !ptr_buffer_in || !ptr_buffer_aux ||  !ptr_buffer_out ){
-            printk("Error call mallok, %s, %i\n",__FUNCTION__,__LINE__);
+            printk("Open_Error call mallok, %s, %i\n",__FUNCTION__,__LINE__);
 	    retval=-1;
         }else{
-            printk("Ingreso el escritor del grupo.Mem OK\n");
+            printk("Writer_Ingreso el escritor del grupo.Mem OK\n");
             // Init timer to copy buffer from kernel buffer to the kernel buffer 
+//	    atomic_inc_and_test(&nro_user); /* This letme know when the writer go out*/
             init_module_timer( );// ver error
 	    index_writer=0;
 	    index_last_writer=0;
 	    retval=0;
         }    	
     }else{
-            printk("Ingreso del lector nro: %i\n",atomic_read(&nro_user));
+            printk("Writer_Ingreso del lector nro: %i\n",atomic_read(&nro_user));
 	    retval=0;
     }
     return retval; // ver q retorna
@@ -275,13 +292,15 @@ int open(struct inode * no,struct file *fd){
 
 
 int chat_close(struct inode *inode, struct file *flip){
-    if(!atomic_dec_and_test(&nro_user)){
+    if(atomic_dec_and_test(&nro_user)){
         printk("Un lector a dejado el chat, quedan %i\n",atomic_read(&nro_user));
        
     }else{
-        printk("El escrito dejo el chat.\n");
-
+        printk("Writer_Quedan en el chat %i\n",atomic_read(&nro_user));
+   	mutex_unlock(&mutex_read_sync); /*Make sure that all readers finshed */
+        printk("Writer_El escritor dejo el chat.\n");
         if (ptr_buffer_in){
+   	    mutex_lock(&mutex_read_sync);
             cleanup_module_timmer();
             kfree(ptr_buffer_in);
             kfree(ptr_buffer_aux);
